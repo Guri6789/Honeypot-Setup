@@ -1,6 +1,6 @@
 # 🍯 HoneyBank — Online Banking Honeypot
 
-A realistic fake online banking portal designed to attract, detect, and log cyberattacks.  
+A fake online banking portal designed to attract, detect, and log cyberattacks.  
 Built for cybersecurity learning and research.
 
 ---
@@ -53,7 +53,7 @@ honeypot-banking/
 
 ## 🚀 Quick Start (Kali Linux)
 
-### Option A — Direct Python
+### Direct Python
 
 ```bash
 # 1. Clone / copy the project to Kali
@@ -66,20 +66,7 @@ pip3 install -r requirements.txt
 python3 main.py
 ```
 
-### Option B — Docker (Recommended)
 
-```bash
-# Build and run everything
-docker compose up --build
-
-# Run in background
-docker compose up -d --build
-
-# View logs
-docker compose logs -f
-```
-
----
 
 ## 🌐 Services
 
@@ -196,10 +183,4 @@ Then open the **Dashboard** at `http://localhost:5000` to see all attacks logged
 
 ---
 
-## 📦 Optional: MaxMind GeoIP Setup
 
-```bash
-# Download free GeoLite2-City.mmdb from MaxMind
-# https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
-# Place it at: data/GeoLite2-City.mmdb
-```
