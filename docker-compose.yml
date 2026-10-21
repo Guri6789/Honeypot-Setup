@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+
+  # ── Fake Banking Web Portal (Main Honeypot) ───────────────────────────
+  web-honeypot:
+    build: .
+    container_name: honeybank-web
+    command: python web/app.py
+    ports:
+      - "8080:8080"       # Expose banking portal
+    volumes:
+      - ./data:/app/data  # Persist logs & payloads
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      - ABUSEIPDB_API_KEY=${ABUSEIPDB_API_KEY:-}
+    restart: unless-stopped
+    networks:
+      - honeypot-net
+
+  # ── SSH Trap ───────────────────────────────────────────────────────────
+  ssh-trap:
+    build: .
+    container_name: honeybank-ssh
+    command: python services/ssh_trap.py
+    ports:
+      - "2222:2222"       # Fake SSH port
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+    restart: unless-stopped
+    networks:
+      - honeypot-net
+
+  # ── Monitoring Dashboard ───────────────────────────────────────────────
+  dashboard:
+    build: .
+    container_name: honeybank-dashboard
+    command: python dashboard/app.py
+    ports:
+      - "5000:5000"       # Dashboard (keep this private / localhost only)
+    volumes:
+      - ./data:/app/data  # Shared log volume — reads from honeypot logs
+    environment:
+      - DASHBOARD_SECRET=${DASHBOARD_SECRET:-changeme_dashboard_pass}
+    restart: unless-stopped
+    networks:
+      - honeypot-net
+
+networks:
+  honeypot-net:
+    driver: bridge

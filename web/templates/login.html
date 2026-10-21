@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ bank_name }} — Secure Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a2744 0%, #1a4b8f 50%, #0d3d6b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .bank-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .bank-logo {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+        .bank-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0a2744;
+            letter-spacing: 1px;
+        }
+        .bank-tagline {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, #0a2744, #1a4b8f, #0a2744);
+            margin: 20px 0;
+        }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        input:focus { border-color: #1a4b8f; }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0a2744, #1a4b8f);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            letter-spacing: 1px;
+        }
+        .btn-login:hover { opacity: 0.9; }
+        .error-box {
+            background: #fff3f3;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #721c24;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+        .security-badge span { color: #27ae60; font-size: 14px; }
+        .forgot-link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+        }
+        .forgot-link a { color: #1a4b8f; text-decoration: none; }
+        .forgot-link a:hover { text-decoration: underline; }
+        .notice {
+            background: #e8f4fd;
+            border-left: 4px solid #1a4b8f;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #333;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 20px;
+        }
+        .demo-box {
+            margin-top: 20px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .demo-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .demo-user-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 7px 10px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .demo-user-item:last-child { margin-bottom: 0; }
+        .demo-user-item:hover {
+            border-color: #1a4b8f;
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+        .demo-user-name { font-size: 12px; font-weight: 600; color: #1e293b; }
+        .demo-user-meta { font-size: 11px; color: #64748b; }
+        .demo-use-badge {
+            font-size: 10px;
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="bank-header">
+            <div class="bank-logo">🏦</div>
+            <div class="bank-name">{{ bank_name }}</div>
+            <div class="bank-tagline">Your trusted financial partner since 1987</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="notice">
+            🔒 For your security, please verify your identity before accessing your account.
+        </div>
+
+        {% if error %}
+        <div class="error-box">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login" autocomplete="off">
+            <div class="form-group">
+                <label for="username">Email Address / Username</label>
+                <input type="text" id="username" name="username"
+                       placeholder="e.g. john.doe@securebank.com or demo" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password"
+                       placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn-login">SIGN IN SECURELY</button>
+        </form>
+
+        <div class="demo-box">
+            <div class="demo-box-header">
+                <span>Default Demo Accounts</span>
+                <span style="color:#1a4b8f;font-weight:normal;text-transform:none;">Click to fill</span>
+            </div>
+            <div class="demo-user-item" onclick="fillBankUser('john.doe@securebank.com', 'password123')">
+                <div>
+                    <div class="demo-user-name">John Doe</div>
+                    <div class="demo-user-meta">john.doe@securebank.com (pass: password123)</div>
+                </div>
+                <div class="demo-use-badge">Use →</div>
+            </div>
+            <div class="demo-user-item" onclick="fillBankUser('sarah.smith@securebank.com', 'sarah2024')">
+                <div>
+                    <div class="demo-user-name">Sarah Smith (Premier)</div>
+                    <div class="demo-user-meta">sarah.smith@securebank.com (pass: sarah2024)</div>
+                </div>
+                <div class="demo-use-badge">Use →</div>
+            </div>
+            <div class="demo-user-item" onclick="fillBankUser('demo@securebank.com', 'demo1234')">
+                <div>
+                    <div class="demo-user-name">Demo User</div>
+                    <div class="demo-user-meta">demo@securebank.com (pass: demo1234)</div>
+                </div>
+                <div class="demo-use-badge">Use →</div>
+            </div>
+            <div class="demo-user-item" onclick="fillBankUser('finance@acmecorp.com', 'acme2024')">
+                <div>
+                    <div class="demo-user-name">Corporate Treasury</div>
+                    <div class="demo-user-meta">finance@acmecorp.com (pass: acme2024)</div>
+                </div>
+                <div class="demo-use-badge">Use →</div>
+            </div>
+        </div>
+
+        <div class="forgot-link">
+            <a href="#">Forgot Password?</a> &nbsp;|&nbsp; <a href="#">New Customer? Register</a>
+        </div>
+
+        <div class="security-badge">
+            <span>🔒</span> 256-bit SSL Encrypted &nbsp;|&nbsp; <span>✓</span> FDIC Insured
+        </div>
+    </div>
+
+    <script>
+        function fillBankUser(user, pass) {
+            document.getElementById('username').value = user;
+            document.getElementById('password').value = pass;
+            document.getElementById('password').focus();
+        }
+    </script>
+</body>
+</html>

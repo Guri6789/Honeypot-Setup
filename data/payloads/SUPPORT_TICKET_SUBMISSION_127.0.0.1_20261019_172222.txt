@@ -1,0 +1,1 @@
+ticket=SUP-32748&category=Fraud & Suspicious Activity Dispute&priority=Urgent&subject=Unrecognized charge inquiry&message=I noticed an unrecognized charge and request urgent review.&email=john.doe@securebank.com&account=****4521

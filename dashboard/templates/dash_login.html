@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoneyBank Monitor — SOC Authentication</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, monospace;
+            background: #0d1117;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #c9d1d9;
+        }
+        .box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 36px;
+            width: 420px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+        }
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(88, 166, 255, 0.1);
+            color: #58a6ff;
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        h2 { color: #f0f6fc; font-size: 22px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .sub { color: #8b949e; font-size: 13px; margin-bottom: 24px; line-height: 1.4; }
+        label { display: block; font-size: 11px; color: #8b949e; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        input {
+            width: 100%;
+            padding: 11px 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus { border-color: #58a6ff; box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15); }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #238636;
+            border: 1px solid rgba(240,246,252,0.1);
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #2ea043; }
+        .error {
+            background: rgba(248,81,73,0.1);
+            border: 1px solid #f85149;
+            border-radius: 6px;
+            padding: 12px;
+            color: #ff7b72;
+            font-size: 13px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .demo-section {
+            margin-top: 26px;
+            padding-top: 20px;
+            border-top: 1px solid #21262d;
+        }
+        .demo-title {
+            font-size: 12px;
+            color: #8b949e;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .demo-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .demo-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 9px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .demo-card:hover {
+            border-color: #58a6ff;
+            background: #161b22;
+        }
+        .demo-user { font-size: 13px; font-weight: 600; color: #58a6ff; font-family: monospace; }
+        .demo-role { font-size: 11px; color: #8b949e; }
+        .demo-fill-btn {
+            font-size: 11px;
+            color: #3fb950;
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .notice-pill {
+            margin-top: 18px;
+            font-size: 11px;
+            color: #6e7681;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="header-badge">🛡️ SIEM SOC Console</div>
+        <h2>🍯 HoneyBank Monitor</h2>
+        <div class="sub">Threat Detection Dashboard — Authenticate to access real-time telemetry</div>
+
+        {% if error %}
+        <div class="error">
+            <span>⚠️</span> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login" autocomplete="off">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="e.g. admin or analyst" required autofocus>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter dashboard password" required>
+
+            <button type="submit" class="btn">AUTHENTICATE & ENTER</button>
+        </form>
+
+        <div class="demo-section">
+            <div class="demo-title">
+                <span>Default Monitoring Accounts</span>
+                <span style="color:#58a6ff;font-size:11px;font-weight:normal;">Click to auto-fill</span>
+            </div>
+            <div class="demo-grid">
+                {% if default_users %}
+                    {% for uname, udata in default_users.items() %}
+                    <div class="demo-card" onclick="fillCredentials('{{ uname }}', '{{ udata.password }}')">
+                        <div>
+                            <div class="demo-user">{{ uname }}</div>
+                            <div class="demo-role">{{ udata.role }} ({{ udata.name }})</div>
+                        </div>
+                        <div class="demo-fill-btn">Fill →</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="demo-card" onclick="fillCredentials('admin', 'admin123')">
+                        <div>
+                            <div class="demo-user">admin</div>
+                            <div class="demo-role">Administrator</div>
+                        </div>
+                        <div class="demo-fill-btn">Fill →</div>
+                    </div>
+                    <div class="demo-card" onclick="fillCredentials('analyst', 'analyst123')">
+                        <div>
+                            <div class="demo-user">analyst</div>
+                            <div class="demo-role">SOC Analyst</div>
+                        </div>
+                        <div class="demo-fill-btn">Fill →</div>
+                    </div>
+                    <div class="demo-card" onclick="fillCredentials('auditor', 'auditor123')">
+                        <div>
+                            <div class="demo-user">auditor</div>
+                            <div class="demo-role">Security Auditor</div>
+                        </div>
+                        <div class="demo-fill-btn">Fill →</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="notice-pill">
+            Session activity is recorded for audit compliance
+        </div>
+    </div>
+
+    <script>
+        function fillCredentials(user, pass) {
+            document.getElementById('username').value = user;
+            document.getElementById('password').value = pass;
+            document.getElementById('password').focus();
+        }
+    </script>
+</body>
+</html>

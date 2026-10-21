@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoneyBank — Threat Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', monospace; background: #0d1117; color: #c9d1d9; min-height: 100vh; }
+
+        .header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title { font-size: 20px; font-weight: 700; color: #58a6ff; }
+        .header-title span { color: #f85149; }
+        .live-badge {
+            background: #f85149;
+            color: white;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .header-right { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+        .header-right a { color: #8b949e; text-decoration: none; }
+
+        .container { padding: 24px 30px; }
+
+        /* Stats Row */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .stat-label { font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-weight: 700; color: #58a6ff; }
+        .stat-sub { font-size: 12px; color: #8b949e; margin-top: 4px; }
+        .stat-card.danger .stat-value { color: #f85149; }
+        .stat-card.warning .stat-value { color: #d29922; }
+        .stat-card.success .stat-value { color: #3fb950; }
+
+        /* Charts Row */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .chart-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .chart-title { font-size: 14px; font-weight: 600; color: #c9d1d9; margin-bottom: 16px; }
+
+        /* Live Feed */
+        .feed-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .feed-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .feed-title { font-size: 14px; font-weight: 600; color: #c9d1d9; }
+
+        .feed-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .feed-table th {
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid #30363d;
+            color: #8b949e;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+        .feed-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #1c2128;
+            vertical-align: middle;
+        }
+        .feed-table tr:last-child td { border-bottom: none; }
+        .feed-table tr:hover td { background: #1c2128; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-critical { background: rgba(248,81,73,0.2); color: #f85149; border: 1px solid #f85149; }
+        .badge-high     { background: rgba(248,81,73,0.1); color: #ff7b72; border: 1px solid #ff7b72; }
+        .badge-medium   { background: rgba(210,153,34,0.1); color: #d29922; border: 1px solid #d29922; }
+        .badge-low      { background: rgba(139,148,158,0.1); color: #8b949e; border: 1px solid #8b949e; }
+
+        .payload-cell { font-family: monospace; color: #79c0ff; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ip-cell { color: #3fb950; font-family: monospace; }
+        .time-cell { color: #8b949e; font-size: 11px; }
+        .type-cell { color: #d2a8ff; font-weight: 500; }
+
+        /* Top IPs */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .ip-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1c2128; }
+        .ip-item:last-child { border-bottom: none; }
+        .ip-count { background: #f85149; color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="header-title">🍯 Honey<span>Bank</span> Threat Monitor</div>
+        <div class="live-badge">● LIVE</div>
+    </div>
+    <div class="header-right">
+        <span id="last-update">Connecting...</span>
+        <div class="user-badge" style="display:flex;align-items:center;gap:8px;background:#21262d;padding:4px 10px;border-radius:6px;border:1px solid #30363d;font-size:12px;">
+            <span style="color:#58a6ff;font-weight:500;">👤 {{ name }}</span>
+            <span style="background:rgba(88,166,255,0.15);color:#79c0ff;padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;font-weight:600;">{{ role }}</span>
+        </div>
+        <a href="/logout" style="background:#21262d;padding:4px 10px;border-radius:6px;border:1px solid #30363d;transition:color 0.2s;">Sign Out</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card danger">
+            <div class="stat-label">⚡ Total Attacks</div>
+            <div class="stat-value" id="total-attacks">—</div>
+            <div class="stat-sub">All time</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-label">🔑 Auth Attempts</div>
+            <div class="stat-value" id="total-auth">—</div>
+            <div class="stat-sub">Credential attacks</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">🧠 Attack Types</div>
+            <div class="stat-value" id="attack-types">—</div>
+            <div class="stat-sub">Unique categories</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-label">🌍 Unique IPs</div>
+            <div class="stat-value" id="unique-ips">—</div>
+            <div class="stat-sub">Distinct attackers</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title">📊 Attack Types Distribution</div>
+            <canvas id="attackTypeChart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">🔝 Top Attacker IPs</div>
+            <div id="top-ips-list"></div>
+        </div>
+    </div>
+
+    <!-- Live Feed -->
+    <div class="feed-card">
+        <div class="feed-header">
+            <div class="feed-title">📡 Live Attack Feed</div>
+            <span style="font-size:12px;color:#8b949e;">Auto-refreshes every 5 seconds</span>
+        </div>
+        <table class="feed-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Severity</th>
+                    <th>Attack Type</th>
+                    <th>IP</th>
+                    <th>Endpoint</th>
+                    <th>Payload</th>
+                </tr>
+            </thead>
+            <tbody id="feed-body">
+                <tr><td colspan="6" style="text-align:center;color:#8b949e;padding:20px;">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+let attackChart = null;
+
+function severityBadge(s) {
+    const map = { CRITICAL: 'badge-critical', HIGH: 'badge-high', MEDIUM: 'badge-medium', LOW: 'badge-low' };
+    return `<span class="badge ${map[s] || 'badge-low'}">${s}</span>`;
+}
+
+function formatTime(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    return d.toLocaleTimeString();
+}
+
+async function refreshStats() {
+    try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+
+        document.getElementById('total-attacks').textContent = data.total_attacks;
+        document.getElementById('total-auth').textContent = data.total_auth_attempts;
+        document.getElementById('attack-types').textContent = Object.keys(data.attack_types).length;
+        document.getElementById('unique-ips').textContent = data.top_attacker_ips.length;
+        document.getElementById('last-update').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+
+        // Attack type chart
+        const labels = Object.keys(data.attack_types);
+        const values = Object.values(data.attack_types);
+        const colors = ['#f85149','#ff7b72','#d29922','#58a6ff','#3fb950','#d2a8ff','#79c0ff'];
+
+        if (!attackChart) {
+            const ctx = document.getElementById('attackTypeChart').getContext('2d');
+            attackChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+                options: {
+                    plugins: { legend: { labels: { color: '#c9d1d9', font: { size: 12 } } } },
+                    cutout: '60%'
+                }
+            });
+        } else {
+            attackChart.data.labels = labels;
+            attackChart.data.datasets[0].data = values;
+            attackChart.update();
+        }
+
+        // Top IPs
+        const ipList = document.getElementById('top-ips-list');
+        ipList.innerHTML = data.top_attacker_ips.slice(0, 8).map(([ip, count]) =>
+            `<div class="ip-item">
+                <span class="ip-cell">${ip}</span>
+                <span class="ip-count">${count} hits</span>
+            </div>`
+        ).join('') || '<div style="color:#8b949e;font-size:13px;padding:8px;">No attacks yet</div>';
+
+        // Live feed
+        const tbody = document.getElementById('feed-body');
+        if (data.recent_attacks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8b949e;padding:20px;">No attacks recorded yet</td></tr>';
+        } else {
+            tbody.innerHTML = data.recent_attacks.map(a =>
+                `<tr>
+                    <td class="time-cell">${formatTime(a.timestamp)}</td>
+                    <td>${severityBadge(a.severity)}</td>
+                    <td class="type-cell">${a.attack_type}</td>
+                    <td class="ip-cell">${a.ip}</td>
+                    <td style="color:#c9d1d9">${a.endpoint}</td>
+                    <td class="payload-cell" title="${a.payload}">${a.payload || '—'}</td>
+                </tr>`
+            ).join('');
+        }
+
+    } catch (e) {
+        document.getElementById('last-update').textContent = 'Error connecting...';
+    }
+}
+
+// Initial load + auto-refresh every 5 seconds
+refreshStats();
+setInterval(refreshStats, 5000);
+</script>
+
+</body>
+</html>

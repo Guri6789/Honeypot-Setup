@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ bank_name }} — Account Statements</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4f8; color: #2d3748; }
+        .navbar {
+            background: linear-gradient(135deg, #0a2744 0%, #1a4b8f 100%);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(10,39,68,0.15);
+        }
+        .nav-brand { font-size: 20px; font-weight: 700; color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-right { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+        .nav-greeting { color: rgba(255,255,255,0.85); margin-right: 8px; }
+        .nav-link { color: rgba(255,255,255,0.8); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: all 0.2s ease; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(255,255,255,0.15); }
+        .nav-logout { background: rgba(231,76,60,0.25); color: #ffb4ab; border: 1px solid rgba(231,76,60,0.4); }
+        .nav-logout:hover { background: #e74c3c; color: white; }
+
+        .container { max-width: 1100px; margin: 36px auto; padding: 0 20px; }
+        .header-section { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
+        .page-title { font-size: 26px; font-weight: 700; color: #0a2744; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .page-subtitle { font-size: 14px; color: #718096; }
+
+        .account-banner {
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(10,39,68,0.06);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .banner-stat { display: flex; flex-direction: column; }
+        .banner-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #718096; letter-spacing: 0.5px; }
+        .banner-val { font-size: 20px; font-weight: 700; color: #0a2744; margin-top: 4px; }
+        .banner-sub { font-size: 12px; color: #4a5568; margin-top: 2px; }
+
+        .controls-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(10,39,68,0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .filter-form { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-label { font-size: 13px; font-weight: 600; color: #4a5568; }
+        select {
+            padding: 8px 14px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #2d3748;
+            background: #fff;
+            outline: none;
+            font-family: inherit;
+        }
+        select:focus { border-color: #1a4b8f; }
+
+        .btn-filter {
+            padding: 8px 16px;
+            background: #edf2f7;
+            color: #2d3748;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-filter:hover { background: #e2e8f0; }
+
+        .btn-download {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #0a2744 0%, #1a4b8f 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-download:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(10,39,68,0.25); }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(10,39,68,0.06);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .table-header-bar {
+            padding: 20px 24px;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-title { font-size: 17px; font-weight: 600; color: #0a2744; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th {
+            background: #f8fafc;
+            padding: 12px 20px;
+            color: #4a5568;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #2d3748;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
+
+        .tx-desc { display: flex; align-items: center; gap: 12px; font-weight: 500; }
+        .tx-icon-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #edf2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .tx-category {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-credit { background: #def7ec; color: #03543f; }
+        .badge-debit  { background: #fde8e8; color: #9b1c1c; }
+
+        .amount-val { font-weight: 600; font-size: 14px; }
+        .amount-credit { color: #057a55; }
+        .amount-debit  { color: #e02424; }
+
+        .archive-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 30px; }
+        .archive-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(10,39,68,0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .archive-title { font-size: 15px; font-weight: 600; color: #0a2744; margin-bottom: 6px; }
+        .archive-period { font-size: 12px; color: #718096; margin-bottom: 16px; }
+        .archive-actions { display: flex; gap: 8px; }
+        .archive-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: #f7fafc;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #0a2744;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .archive-btn:hover { background: #edf2f7; border-color: #a0aec0; }
+
+        @media (max-width: 900px) {
+            .account-banner { grid-template-columns: repeat(2, 1fr); }
+            .archive-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/dashboard" class="nav-brand" id="nav-brand-logo">🏦 {{ bank_name }}</a>
+        <div class="nav-right">
+            <span class="nav-greeting">Welcome, <strong>{{ user_name }}</strong></span>
+            <a href="/dashboard" class="nav-link" id="nav-dashboard">Dashboard</a>
+            <a href="/transfer" class="nav-link" id="nav-transfer">Transfer</a>
+            <a href="/pay-bills" class="nav-link" id="nav-bills">Pay Bills</a>
+            <a href="/statements" class="nav-link active" id="nav-statements">Statements</a>
+            <a href="/support" class="nav-link" id="nav-support">Support</a>
+            <a href="/logout" class="nav-link nav-logout" id="nav-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <div>
+                <div class="page-title">📊 Account Statements & Ledger</div>
+                <div class="page-subtitle">Inspect historical activity, download monthly tax & audit ledgers, or export comma-separated files</div>
+            </div>
+            <div>
+                <a href="/statements/download?period={{ selected_period }}&type={{ selected_type }}" id="btn-download-csv" class="btn-download">
+                    📥 Download CSV Statement
+                </a>
+            </div>
+        </div>
+
+        <div class="account-banner">
+            <div class="banner-stat">
+                <span class="banner-label">Account Name</span>
+                <span class="banner-val">{{ user_name }}</span>
+                <span class="banner-sub">{{ account_type }}</span>
+            </div>
+            <div class="banner-stat">
+                <span class="banner-label">Account Number</span>
+                <span class="banner-val">{{ account_number }}</span>
+                <span class="banner-sub">Routing # 021000089</span>
+            </div>
+            <div class="banner-stat">
+                <span class="banner-label">Current Ledger Balance</span>
+                <span class="banner-val" style="color: #057a55;">{{ balance }}</span>
+                <span class="banner-sub">Savings: {{ savings_balance }}</span>
+            </div>
+            <div class="banner-stat">
+                <span class="banner-label">Statement Status</span>
+                <span class="banner-val" style="font-size: 16px; margin-top:8px;">Active & Reconciled</span>
+                <span class="banner-sub">Cycle: Oct 31, 2026</span>
+            </div>
+        </div>
+
+        <div class="controls-card">
+            <form method="GET" action="/statements" class="filter-form" id="statement-filter-form">
+                <div class="filter-group">
+                    <label for="period-select" class="filter-label">Period:</label>
+                    <select name="period" id="period-select">
+                        <option value="all" {% if selected_period == 'all' %}selected{% endif %}>All Records (Last 90 Days)</option>
+                        <option value="2026-09" {% if selected_period == '2026-09' %}selected{% endif %}>September 2026 (Current Cycle)</option>
+                        <option value="2026-08" {% if selected_period == '2026-08' %}selected{% endif %}>August 2026 Statement</option>
+                        <option value="2026-07" {% if selected_period == '2026-07' %}selected{% endif %}>July 2026 Statement</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="type-select" class="filter-label">Transaction Type:</label>
+                    <select name="type" id="type-select">
+                        <option value="all" {% if selected_type == 'all' %}selected{% endif %}>All Activity</option>
+                        <option value="credit" {% if selected_type == 'credit' %}selected{% endif %}>Deposits & Credits (+)</option>
+                        <option value="debit" {% if selected_type == 'debit' %}selected{% endif %}>Withdrawals & Debits (-)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-filter" id="btn-apply-filter">Filter Ledger</button>
+            </form>
+
+            <span style="font-size: 12px; color: #718096;">Showing {{ transactions|length }} transactions</span>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header-bar">
+                <div class="table-title">Activity Details</div>
+                <div style="font-size: 12px; color: #718096;">Values are posted in USD</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Reference ID</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="statement-transactions-body">
+                    {% if transactions %}
+                        {% for tx in transactions %}
+                        <tr>
+                            <td style="font-weight: 500;">{{ tx.date }}</td>
+                            <td style="font-family: monospace; color: #4a5568;">{{ tx.id }}</td>
+                            <td>
+                                <div class="tx-desc">
+                                    <div class="tx-icon-badge">{{ tx.icon }}</div>
+                                    <span>{{ tx.name }}</span>
+                                </div>
+                            </td>
+                            <td><span class="tx-category">{{ tx.category }}</span></td>
+                            <td>
+                                <span class="type-badge {% if tx.type == 'credit' %}badge-credit{% else %}badge-debit{% endif %}">
+                                    {{ tx.type }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="amount-val {% if tx.type == 'credit' %}amount-credit{% else %}amount-debit{% endif %}">
+                                    {{ tx.amount }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="display:inline-flex; align-items:center; gap:4px; color:#057a55; font-size:12px; font-weight:500;">
+                                    ✓ {{ tx.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 36px; color: #718096;">
+                                No transaction records found matching the specified filters.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <div style="font-size: 18px; font-weight: 700; color: #0a2744; margin-bottom: 4px;">Monthly Statement Archive</div>
+            <div style="font-size: 13px; color: #718096;">Download certified electronic statements for your tax, accounting, and compliance records</div>
+        </div>
+
+        <div class="archive-grid">
+            <div class="archive-card">
+                <div>
+                    <div class="archive-title">September 2026 Statement</div>
+                    <div class="archive-period">Period: Sep 01, 2026 — Sep 30, 2026</div>
+                </div>
+                <div class="archive-actions">
+                    <a href="/statements/download?period=2026-09" class="archive-btn" id="dl-csv-sep2026">📥 Download CSV</a>
+                </div>
+            </div>
+
+            <div class="archive-card">
+                <div>
+                    <div class="archive-title">August 2026 Statement</div>
+                    <div class="archive-period">Period: Aug 01, 2026 — Aug 31, 2026</div>
+                </div>
+                <div class="archive-actions">
+                    <a href="/statements/download?period=2026-08" class="archive-btn" id="dl-csv-aug2026">📥 Download CSV</a>
+                </div>
+            </div>
+
+            <div class="archive-card">
+                <div>
+                    <div class="archive-title">July 2026 Statement</div>
+                    <div class="archive-period">Period: Jul 01, 2026 — Jul 31, 2026</div>
+                </div>
+                <div class="archive-actions">
+                    <a href="/statements/download?period=2026-07" class="archive-btn" id="dl-csv-jul2026">📥 Download CSV</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

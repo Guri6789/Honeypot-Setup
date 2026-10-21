@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ bank_name }} — Client Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4f8; color: #2d3748; }
+        .navbar {
+            background: linear-gradient(135deg, #0a2744 0%, #1a4b8f 100%);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(10,39,68,0.15);
+        }
+        .nav-brand { font-size: 20px; font-weight: 700; color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-right { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+        .nav-greeting { color: rgba(255,255,255,0.85); margin-right: 8px; }
+        .nav-link { color: rgba(255,255,255,0.8); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: all 0.2s ease; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(255,255,255,0.15); }
+        .nav-logout { background: rgba(231,76,60,0.25); color: #ffb4ab; border: 1px solid rgba(231,76,60,0.4); }
+        .nav-logout:hover { background: #e74c3c; color: white; }
+
+        .container { max-width: 1060px; margin: 36px auto; padding: 0 20px; }
+        .header-section { margin-bottom: 24px; }
+        .page-title { font-size: 26px; font-weight: 700; color: #0a2744; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .page-subtitle { font-size: 14px; color: #718096; }
+
+        .alert-success {
+            background: #e6fffa;
+            border: 1px solid #38b2ac;
+            border-left: 5px solid #319795;
+            color: #234e52;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(56,178,172,0.1);
+        }
+
+        .main-layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(10,39,68,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .card-header { font-size: 18px; font-weight: 600; color: #0a2744; margin-bottom: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #2d3748;
+            background: #fff;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #1a4b8f;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26,75,143,0.15);
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0a2744 0%, #1a4b8f 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(10,39,68,0.25); }
+
+        .contact-channel {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+        }
+        .channel-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #ebf8ff;
+            color: #2b6cb0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .channel-title { font-size: 13px; font-weight: 600; color: #2d3748; }
+        .channel-val { font-size: 14px; font-weight: 700; color: #1a4b8f; margin-top: 2px; }
+        .channel-sub { font-size: 11px; color: #718096; margin-top: 2px; }
+
+        .faq-item {
+            border-bottom: 1px solid #edf2f7;
+            padding: 12px 0;
+        }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-question { font-size: 13px; font-weight: 600; color: #2d3748; margin-bottom: 4px; }
+        .faq-answer { font-size: 12px; color: #718096; line-height: 1.5; }
+
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/dashboard" class="nav-brand" id="nav-brand-logo">🏦 {{ bank_name }}</a>
+        <div class="nav-right">
+            <span class="nav-greeting">Welcome, <strong>{{ user_name }}</strong></span>
+            <a href="/dashboard" class="nav-link" id="nav-dashboard">Dashboard</a>
+            <a href="/transfer" class="nav-link" id="nav-transfer">Transfer</a>
+            <a href="/pay-bills" class="nav-link" id="nav-bills">Pay Bills</a>
+            <a href="/statements" class="nav-link" id="nav-statements">Statements</a>
+            <a href="/support" class="nav-link active" id="nav-support">Support</a>
+            <a href="/logout" class="nav-link nav-logout" id="nav-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <div class="page-title">📞 Client Support & Help Center</div>
+            <div class="page-subtitle">Submit secure customer inquiries, report suspicious activity, or connect with dedicated support specialists</div>
+        </div>
+
+        {% if message %}
+        <div class="alert-success" id="support-success-alert">
+            <span>✅</span>
+            <div>{{ message }}</div>
+        </div>
+        {% endif %}
+
+        <div class="main-layout">
+            <div class="card">
+                <div class="card-header">
+                    <span>Submit Support Ticket</span>
+                    <span style="font-size:12px; color:#718096; font-weight:400;">24/7 Dedicated Response</span>
+                </div>
+
+                <form method="POST" action="/support" id="form-support-ticket">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="support-category">Department / Category</label>
+                            <select name="category" id="support-category" required>
+                                <option value="Fraud & Suspicious Activity Dispute">🚨 Fraud & Suspicious Activity Dispute</option>
+                                <option value="Wire & Electronic Transfer Verification">💸 Wire & Transfer Verification</option>
+                                <option value="Account Access & Credentials">🔐 Account Access & Security Credentials</option>
+                                <option value="Bill Payment & Recurring Charges">📄 Bill Payment & Direct Debits</option>
+                                <option value="Tax & Official Statement Records">📊 Tax & Historical Statement Records</option>
+                                <option value="General Banking Inquiry">ℹ️ General Banking Inquiry</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="support-priority">Priority Level</label>
+                            <select name="priority" id="support-priority">
+                                <option value="Standard">Standard (Within 24 Hours)</option>
+                                <option value="Urgent">Urgent (Immediate Specialist Review)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="support-account">Associated Account</label>
+                            <input type="text" name="account" id="support-account" value="{{ account_type }} {{ account_number }}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="support-email">Contact Email</label>
+                            <input type="email" name="email" id="support-email" value="{{ user }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="support-subject">Subject</label>
+                        <input type="text" name="subject" id="support-subject" placeholder="Brief summary of your question or issue" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="support-message">Message Details</label>
+                        <textarea name="message" id="support-message" rows="5" placeholder="Please describe the transaction or inquiry in detail..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btn-submit-support">SUBMIT INQUIRY TICKET</button>
+                </form>
+            </div>
+
+            <div>
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <span>Direct Assistance Channels</span>
+                    </div>
+
+                    <div class="contact-channel">
+                        <div class="channel-icon">🛡️</div>
+                        <div>
+                            <div class="channel-title">24/7 Security Hotline</div>
+                            <div class="channel-val">1-800-555-0199</div>
+                            <div class="channel-sub">Toll-free within North America</div>
+                        </div>
+                    </div>
+
+                    <div class="contact-channel">
+                        <div class="channel-icon">🌐</div>
+                        <div>
+                            <div class="channel-title">International Client Concierge</div>
+                            <div class="channel-val">+1 (212) 555-0143</div>
+                            <div class="channel-sub">Direct international toll desk</div>
+                        </div>
+                    </div>
+
+                    <div class="contact-channel">
+                        <div class="channel-icon">🏦</div>
+                        <div>
+                            <div class="channel-title">Corporate Wire Operations</div>
+                            <div class="channel-val">1-800-555-0144</div>
+                            <div class="channel-sub">Mon–Fri 8:00 AM – 6:00 PM EST</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span>Frequently Asked Questions</span>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">How do I report an unrecognized debit?</div>
+                        <div class="faq-answer">Select 'Fraud & Suspicious Activity Dispute' above and specify the transaction date, reference number, and merchant name for immediate review.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">What are the daily outbound transfer limits?</div>
+                        <div class="faq-answer">Personal Checking accounts can transfer up to $50,000.00 daily via ACH or wire. Commercial Treasury accounts have an extended limit of $500,000.00.</div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">How do I update my two-factor security device?</div>
+                        <div class="faq-answer">Submit a security credentials request above or call the 24/7 Security Hotline with your verified account PIN.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

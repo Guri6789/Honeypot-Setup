@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ bank_name }} — Pay Bills</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4f8; color: #2d3748; }
+        .navbar {
+            background: linear-gradient(135deg, #0a2744 0%, #1a4b8f 100%);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(10,39,68,0.15);
+        }
+        .nav-brand { font-size: 20px; font-weight: 700; color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-right { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+        .nav-greeting { color: rgba(255,255,255,0.85); margin-right: 8px; }
+        .nav-link { color: rgba(255,255,255,0.8); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: all 0.2s ease; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(255,255,255,0.15); }
+        .nav-logout { background: rgba(231,76,60,0.25); color: #ffb4ab; border: 1px solid rgba(231,76,60,0.4); }
+        .nav-logout:hover { background: #e74c3c; color: white; }
+
+        .container { max-width: 1060px; margin: 36px auto; padding: 0 20px; }
+        .header-section { margin-bottom: 24px; }
+        .page-title { font-size: 26px; font-weight: 700; color: #0a2744; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .page-subtitle { font-size: 14px; color: #718096; }
+
+        .alert-success {
+            background: #e6fffa;
+            border: 1px solid #38b2ac;
+            border-left: 5px solid #319795;
+            color: #234e52;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(56,178,172,0.1);
+        }
+
+        .main-layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(10,39,68,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .card-header { font-size: 18px; font-weight: 600; color: #0a2744; margin-bottom: 20px; border-bottom: 1px solid #edf2f7; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #2d3748;
+            background: #fff;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #1a4b8f;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26,75,143,0.15);
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0a2744 0%, #1a4b8f 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(10,39,68,0.25); }
+
+        .biller-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+        }
+        .biller-left { display: flex; align-items: center; gap: 12px; }
+        .biller-icon { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .biller-name { font-size: 13px; font-weight: 600; color: #2d3748; }
+        .biller-sub { font-size: 11px; color: #718096; }
+        .biller-status { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; background: #def7ec; color: #03543f; }
+
+        .security-badge {
+            background: #ebf8ff;
+            border: 1px solid #bee3f8;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 12px;
+            color: #2b6cb0;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/dashboard" class="nav-brand" id="nav-brand-logo">🏦 {{ bank_name }}</a>
+        <div class="nav-right">
+            <span class="nav-greeting">Welcome, <strong>{{ user_name }}</strong></span>
+            <a href="/dashboard" class="nav-link" id="nav-dashboard">Dashboard</a>
+            <a href="/transfer" class="nav-link" id="nav-transfer">Transfer</a>
+            <a href="/pay-bills" class="nav-link active" id="nav-bills">Pay Bills</a>
+            <a href="/statements" class="nav-link" id="nav-statements">Statements</a>
+            <a href="/support" class="nav-link" id="nav-support">Support</a>
+            <a href="/logout" class="nav-link nav-logout" id="nav-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <div class="page-title">📄 Bill Payment Center</div>
+            <div class="page-subtitle">Schedule one-time or recurring payments to registered utilities, institutions, and service providers</div>
+        </div>
+
+        {% if message %}
+        <div class="alert-success" id="bill-success-alert">
+            <span>✅</span>
+            <div>{{ message }}</div>
+        </div>
+        {% endif %}
+
+        <div class="main-layout">
+            <div class="card">
+                <div class="card-header">
+                    <span>Pay a Biller</span>
+                    <span style="font-size:12px; color:#718096; font-weight:400;">Guaranteed On-Time Delivery</span>
+                </div>
+
+                <form method="POST" action="/pay-bills" id="form-pay-bills">
+                    <div class="form-group">
+                        <label for="bill-from-account">From Account</label>
+                        <select name="from_account" id="bill-from-account" required>
+                            <option value="checking">{{ account_type }} {{ account_number }} — Available: {{ balance }}</option>
+                            <option value="savings">High-Yield Savings ****8821 — Available: {{ savings_balance }}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="biller-select">Select Biller / Payee</label>
+                        <select name="biller" id="biller-select" required onchange="handleBillerChange(this)">
+                            <option value="National Grid — Electric & Gas">⚡ National Grid — Electric & Gas</option>
+                            <option value="Metropolitan Water & Sewer Authority">💧 Metropolitan Water & Sewer Authority</option>
+                            <option value="Verizon Wireless — Mobile Carrier">📱 Verizon Wireless — Mobile Carrier</option>
+                            <option value="AT&T Fiber Internet & Television">🌐 AT&T Fiber Internet & Television</option>
+                            <option value="Apex Signature Preferred Credit Card">💳 Apex Signature Preferred Credit Card</option>
+                            <option value="State Farm Mutual Auto & Home Insurance">🛡️ State Farm Mutual Auto & Home Insurance</option>
+                            <option value="Municipal Real Estate Property Tax">🏛️ Municipal Real Estate Property Tax</option>
+                            <option value="__custom__">➕ Other / Custom Biller...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="custom-biller-group" style="display: none;">
+                        <label for="custom-biller-input">Custom Biller / Company Name</label>
+                        <input type="text" name="custom_biller" id="custom-biller-input" placeholder="e.g. Acme Property Management LLC">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="biller-account-input">Biller Account / Invoice Number</label>
+                        <input type="text" name="biller_account" id="biller-account-input" placeholder="e.g. 8492-3019-5821" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bill-amount-input">Amount ($)</label>
+                            <input type="number" step="0.01" min="0.01" name="amount" id="bill-amount-input" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment-date-input">Payment Date</label>
+                            <input type="date" name="payment_date" id="payment-date-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="frequency-select">Frequency</label>
+                            <select name="frequency" id="frequency-select">
+                                <option value="One-Time">One-Time Payment</option>
+                                <option value="Monthly Auto-Pay">Monthly Auto-Pay</option>
+                                <option value="Bi-Weekly">Bi-Weekly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bill-memo-input">Memo / Reference Note</label>
+                            <input type="text" name="memo" id="bill-memo-input" placeholder="e.g. October utilities bill">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btn-submit-bill">CONFIRM & SCHEDULE PAYMENT</button>
+                </form>
+
+                <div class="security-badge">
+                    🔒 <strong>Secure Electronic Payment Guarantee:</strong> Electronic bill transfers are protected under federal Regulation E. Funds will be debited upon settlement on the specified payment date.
+                </div>
+            </div>
+
+            <div>
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <span>Recent & Saved Payees</span>
+                    </div>
+
+                    <div class="biller-card">
+                        <div class="biller-left">
+                            <div class="biller-icon">⚡</div>
+                            <div>
+                                <div class="biller-name">National Grid</div>
+                                <div class="biller-sub">Acct: ****8912 &bull; Paid: Sep 12</div>
+                            </div>
+                        </div>
+                        <div class="biller-status">Paid $142.50</div>
+                    </div>
+
+                    <div class="biller-card">
+                        <div class="biller-left">
+                            <div class="biller-icon">💧</div>
+                            <div>
+                                <div class="biller-name">Metro Water Authority</div>
+                                <div class="biller-sub">Acct: ****4102 &bull; Paid: Aug 28</div>
+                            </div>
+                        </div>
+                        <div class="biller-status">Paid $58.20</div>
+                    </div>
+
+                    <div class="biller-card">
+                        <div class="biller-left">
+                            <div class="biller-icon">📱</div>
+                            <div>
+                                <div class="biller-name">Verizon Wireless</div>
+                                <div class="biller-sub">Acct: ****9340 &bull; Paid: Aug 15</div>
+                            </div>
+                        </div>
+                        <div class="biller-status">Paid $85.00</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span>Payment Limits & Notices</span>
+                    </div>
+                    <ul style="font-size: 13px; color: #4a5568; line-height: 1.8; padding-left: 18px;">
+                        <li>Daily online bill payment limit: <strong>$25,000.00</strong></li>
+                        <li>Payments scheduled before 5:00 PM EST deliver next business day.</li>
+                        <li>Zero-liability guarantee on verified bill transfers.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set default payment date to today
+        document.getElementById('payment-date-input').value = new Date().toISOString().split('T')[0];
+
+        function handleBillerChange(selectElem) {
+            const customGroup = document.getElementById('custom-biller-group');
+            const customInput = document.getElementById('custom-biller-input');
+            if (selectElem.value === '__custom__') {
+                customGroup.style.display = 'block';
+                customInput.setAttribute('required', 'required');
+                customInput.focus();
+            } else {
+                customGroup.style.display = 'none';
+                customInput.removeAttribute('required');
+            }
+        }
+    </script>
+</body>
+</html>
